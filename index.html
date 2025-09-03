@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Swiftie Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e9d5ff; /* Fallback background */
+            overflow: hidden;
+        }
+        #interactive-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .font-fancy {
+            font-family: 'Playfair Display', serif;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #7c3aed;
+        }
+        .answer-btn.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+            transform: scale(1.02);
+        }
+        .answer-btn.incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .answer-btn:not(.correct):not(.incorrect):hover {
+             transform: translateY(-2px);
+             border-color: #8b5cf6;
+        }
+        .answer-btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .fade-in { animation: fadeIn 0.6s ease-in-out forwards; }
+        .fade-out { animation: fadeOut 0.6s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(25px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-25px) scale(0.98); }
+        }
+        /* Confetti Styles */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            background-color: #fde047;
+            opacity: 0;
+            animation: confetti-fall 4s ease-out forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10vh) rotateZ(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotateZ(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <canvas id="interactive-bg"></canvas>
+
+    <div id="quiz-container" class="w-full max-w-2xl mx-auto relative">
+        <div id="confetti-container" class="absolute top-0 left-0 w-full h-full pointer-events-none z-50"></div>
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="card rounded-2xl p-8 md:p-12 text-center shadow-2xl fade-in">
+            <h1 class="font-fancy text-4xl md:text-5xl font-bold text-violet-800">The Ultimate Swiftie Quiz</h1>
+            <p class="text-gray-600 mt-4 text-lg">Are you ready for it? Test your Taylor Swift knowledge!</p>
+            <div class="mt-6">
+                <input type="text" id="name-input" placeholder="Enter your name" class="w-full max-w-sm mx-auto p-3 rounded-lg border-2 border-violet-300 focus:ring-2 focus:ring-violet-500 focus:outline-none transition">
+                <p id="name-error" class="text-red-500 text-sm mt-2 h-4"></p>
+            </div>
+            <button id="start-btn" class="btn btn-primary font-bold py-3 px-8 rounded-full mt-4 text-xl">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="card rounded-2xl p-8 md:p-12 shadow-2xl hidden">
+            <div class="relative">
+                <img id="question-image" src="" alt="Quiz Image" class="rounded-lg mb-6 w-full h-48 md:h-64 object-cover shadow-lg transition-opacity duration-300">
+                <div id="timer" class="absolute top-4 right-4 bg-white/70 backdrop-blur-sm text-violet-800 font-bold text-2xl w-16 h-16 rounded-full flex items-center justify-center shadow-md">20</div>
+            </div>
+            <div id="progress-container" class="mb-6">
+                <div class="flex justify-between items-center text-sm font-medium text-gray-600 mb-2">
+                    <p id="question-counter"></p>
+                    <p id="score-counter">Score: 0</p>
+                </div>
+                <div class="w-full bg-violet-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-violet-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 min-h-[100px] transition-opacity duration-300">Question goes here...</h2>
+            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Answer buttons will be generated here -->
+            </div>
+            <div class="flex justify-end mt-8">
+                <button id="next-btn" class="btn btn-primary font-bold py-2 px-6 rounded-full hidden">Next</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="card rounded-2xl p-8 md:p-12 text-center shadow-2xl hidden">
+            <h1 class="font-fancy text-4xl md:text-5xl font-bold text-violet-800">Quiz Complete!</h1>
+            <p id="score-text" class="text-gray-800 mt-4 text-2xl font-semibold"></p>
+            <p id="rating-text" class="text-violet-600 mt-2 text-xl font-medium"></p>
+            <p id="rating-description" class="text-gray-600 mt-4 max-w-md mx-auto"></p>
+            <button id="restart-btn" class="btn btn-primary font-bold py-3 px-8 rounded-full mt-8 text-xl">Play Again</button>
+        </div>
+    </div>
+    
+    <button id="mute-btn" class="fixed bottom-4 right-4 bg-white/50 backdrop-blur-sm text-violet-800 w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110">
+        <svg id="sound-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        <svg id="sound-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+    </button>
+
+    <script>
+        const quizQuestions = [
+            {
+                question: "What is the name of the German Shepherd owned by Andrea Swift, featured in some of Taylor's early home videos?",
+                image: "https://placehold.co/600x400/a78bfa/ffffff?text=Debut+Era",
+                answers: [ { text: "Major", correct: false }, { text: "Kitty", correct: true }, { text: "Bug", correct: false }, { text: "Indy", correct: false }]
+            },
+            {
+                question: "Which of these 'From The Vault' tracks from 'Fearless (TV)' was originally intended for the band Sugarland?",
+                image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era",
+                answers: [ { text: "You All Over Me", correct: false }, { text: "We Were Happy", correct: false }, { text: "Bye Bye Baby", correct: false }, { text: "Babe", correct: true }]
+            },
+            {
+                question: "In the lyric booklet for 'Speak Now', what was the secret message for the song 'Haunted'?",
+                image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era",
+                answers: [ { text: "I'LL ALWAYS REMEMBER US", correct: false }, { text: "I THOUGHT YOU WERE FOREVER", correct: false }, { text: "STILL TO THIS DAY", correct: true }, { text: "I MISS YOU", correct: false }]
+            },
+            {
+                question: "For which song did Taylor use the pseudonym 'Nils Sjöberg' as a songwriter?",
+                image: "https://placehold.co/600x400/60a5fa/ffffff?text=1989+Era",
+                answers: [ { text: "Better Man", correct: false }, { text: "This Is What You Came For", correct: true }, { text: "You'll Always Find Your Way Back Home", correct: false }, { text: "Babe", correct: false }]
+            },
+            {
+                question: "What specific time is mentioned in the lyrics of the song 'Last Kiss'?",
+                image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era",
+                difficulty: 'hard',
+                answers: [ { text: "2:17 AM", correct: false }, { text: "July 9th, 1:58", correct: true }, { text: "Midnight", correct: false }, { text: "4 AM", correct: false }]
+            },
+            {
+                question: "In the 'Anti-Hero' music video, what are the names of her fictional future daughter-in-law and son?",
+                image: "https://placehold.co/600x400/1e293b/ffffff?text=Midnights+Era",
+                answers: [ { text: "Ashley and Chad", correct: false }, { text: "Kimber and Chad", correct: true }, { text: "Crystal and Preston", correct: false }, { text: "Tiffany and Preston", correct: false } ]
+            },
+            {
+                question: "Which of these songs was NOT on the official setlist for the 'reputation Stadium Tour'?",
+                image: "https://placehold.co/600x400/171717/ffffff?text=Reputation+Era",
+                answers: [ { text: "I Did Something Bad", correct: false }, { text: "So It Goes...", correct: true }, { text: "King of My Heart", correct: false }, { text: "Dancing With Our Hands Tied", correct: false }]
+            },
+            {
+                question: "Which music video did Taylor co-direct with Drew Kirsch?",
+                image: "https://placehold.co/600x400/f472b6/ffffff?text=Lover+Era",
+                difficulty: 'hard',
+                answers: [ { text: "The Man", correct: false }, { text: "ME!", correct: false }, { text: "You Need To Calm Down", correct: true }, { text: "cardigan", correct: false } ]
+            },
+            {
+                question: "What is the name of the fictional town that Taylor created for the 'cardigan'/'august'/'betty' love triangle?",
+                image: "https://placehold.co/600x400/6b7280/ffffff?text=Folklore+Era",
+                answers: [ { text: "Gardiner", correct: false }, { text: "Centennial", correct: false }, { text: "No specific town is named", correct: true }, { text: "Cornelia", correct: false }]
+            },
+            {
+                question: "Which track on 'evermore' is a tribute to her grandmother, Marjorie Finlay?",
+                image: "https://placehold.co/600x400/a16207/ffffff?text=Evermore+Era",
+                answers: [ { text: "dorothea", correct: false }, { text: "marjorie", correct: true }, { text: "epiphany", correct: false }, { text: "the best day", correct: false } ]
+            },
+            {
+                question: "What was the name of the cologne Taylor released in 2012?",
+                image: "https://placehold.co/600x400/d8b4fe/333333?text=Red+Era",
+                answers: [ { text: "Incredible Things", correct: false }, { text: "Taylor", correct: false }, { text: "Wonderstruck Enchanted", correct: true }, { text: "Made of Starlight", correct: false }]
+            },
+            {
+                question: "On 'The Tortured Poets Department', what anachronistic device does she say her lover used?",
+                image: "https://placehold.co/600x400/f3f4f6/171717?text=TTPD+Era",
+                answers: [ { text: "A phonograph", correct: false }, { text: "A typewriter", correct: true }, { text: "A quill and ink", correct: false }, { text: "A gramophone", correct: false }]
+            },
+            {
+                question: "What was Taylor's role in the 2014 film 'The Giver'?",
+                image: "https://placehold.co/600x400/c1121f/ffffff?text=Red+Era",
+                difficulty: 'hard',
+                answers: [ { text: "Fiona", correct: false }, { text: "Lily", correct: false }, { text: "Rosemary", correct: true }, { text: "Jonas's Mother", correct: false } ]
+            },
+            {
+                question: "Which song was written about the fallout from the 2009 MTV VMA's incident?",
+                image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era",
+                answers: [ { text: "Mean", correct: false }, { text: "Look What You Made Me Do", correct: false }, { text: "Innocent", correct: true }, { text: "Bad Blood", correct: false }]
+            },
+            {
+                question: "Which of these is a real, unreleased Taylor Swift song title that has been registered on BMI?",
+                image: "https://placehold.co/600x400/d8b4fe/333333?text=Unreleased",
+                answers: [ { text: "My Cure", correct: true }, { text: "Nashville Skyline", correct: false }, { text: "First Glass", correct: false }, { text: "Thirteen Stars", correct: false }]
+            }
+        ];
+
+        // Element variables
+        const startScreen = document.getElementById('start-screen'), quizScreen = document.getElementById('quiz-screen'), resultsScreen = document.getElementById('results-screen');
+        const startBtn = document.getElementById('start-btn'), nextBtn = document.getElementById('next-btn'), restartBtn = document.getElementById('restart-btn'), muteBtn = document.getElementById('mute-btn');
+        const nameInput = document.getElementById('name-input'), nameError = document.getElementById('name-error');
+        const questionImage = document.getElementById('question-image'), questionText = document.getElementById('question-text'), answerButtons = document.getElementById('answer-buttons');
+        const questionCounter = document.getElementById('question-counter'), scoreCounter = document.getElementById('score-counter'), progressBar = document.getElementById('progress-bar'), timerDisplay = document.getElementById('timer');
+        const scoreText = document.getElementById('score-text'), ratingText = document.getElementById('rating-text'), ratingDescription = document.getElementById('rating-description');
+        const confettiContainer = document.getElementById('confetti-container');
+        const soundOnIcon = document.getElementById('sound-on-icon'), soundOffIcon = document.getElementById('sound-off-icon');
+
+        // State variables
+        let currentQuestionIndex, score, shuffledQuestions, isMuted = true, userName, timerInterval;
+        let musicInitialized = false;
+
+        // Music setup
+        let synth, loop;
+
+        function initializeMusic() {
+            if (musicInitialized) return;
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "fmsine" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 1 },
+                volume: -15
+            }).toDestination();
+            const notes = ["C4", "E4", "G4", "B4", "A4", "G4", "E4"];
+            let noteIndex = 0;
+            loop = new Tone.Loop(time => {
+                synth.triggerAttackRelease(notes[noteIndex % notes.length], "8n", time);
+                noteIndex++;
+            }, "4n").start(0);
+            musicInitialized = true;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', showNextQuestion);
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('fade-out');
+            setTimeout(() => {
+                resultsScreen.classList.add('hidden');
+                resultsScreen.classList.remove('fade-out');
+                startScreen.classList.remove('hidden', 'fade-out');
+                startScreen.classList.add('fade-in');
+            }, 600);
+        });
+        muteBtn.addEventListener('click', toggleMute);
+
+        function startQuiz() {
+            userName = nameInput.value.trim();
+            if (userName === "") {
+                nameError.innerText = "Please enter your name!";
+                return;
+            }
+            nameError.innerText = "";
+            
+            if (!musicInitialized) {
+                 initializeMusic();
+            }
+            if (Tone.context.state !== 'running') {
+                Tone.start();
+            }
+            if (!isMuted) {
+                Tone.Transport.start();
+            }
+
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffledQuestions = quizQuestions.sort(() => Math.random() - 0.5);
+            scoreCounter.innerText = "Score: 0";
+            
+            startScreen.classList.add('fade-out');
+            setTimeout(() => {
+                startScreen.classList.add('hidden');
+                startScreen.classList.remove('fade-out');
+                quizScreen.classList.remove('hidden');
+                quizScreen.classList.add('fade-in');
+                showNextQuestion();
+            }, 600);
+        }
+
+        function startTimer() {
+            let timeLeft = 20;
+            timerDisplay.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+        
+        function timeUp() {
+            Array.from(answerButtons.children).forEach(button => {
+                setStatusClass(button, button.dataset.correct === "true");
+                button.disabled = true;
+            });
+            progressBar.style.width = `${(currentQuestionIndex + 1) / shuffledQuestions.length * 100}%`;
+            currentQuestionIndex++;
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+                updateProgress();
+                startTimer();
+            } else {
+                showResults();
+            }
+        }
+        
+        function updateProgress() {
+            questionCounter.innerText = `Question ${currentQuestionIndex + 1} of ${shuffledQuestions.length}`;
+            const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function showQuestion(question) {
+            questionImage.classList.add('opacity-0');
+            questionText.classList.add('opacity-0');
+            setTimeout(() => {
+                questionImage.src = question.image;
+                questionText.innerText = question.question;
+                questionImage.classList.remove('opacity-0');
+                questionText.classList.remove('opacity-0');
+            }, 300);
+
+            question.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('answer-btn', 'btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-violet-300', 'bg-white', 'text-gray-700', 'font-medium');
+                if (answer.correct) button.dataset.correct = answer.correct;
+                button.addEventListener('click', selectAnswer);
+                answerButtons.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            clearInterval(timerInterval);
+            nextBtn.classList.add('hidden');
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            clearInterval(timerInterval);
+            const selectedBtn = e.target;
+            const correct = selectedBtn.dataset.correct === "true";
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+
+            if (correct) {
+                score++;
+                scoreCounter.innerText = `Score: ${score}`;
+                if (currentQuestion.difficulty === 'hard') {
+                    triggerCelebration(50);
+                }
+            }
+
+            Array.from(answerButtons.children).forEach(button => {
+                setStatusClass(button, button.dataset.correct === "true");
+                button.disabled = true;
+            });
+            
+            progressBar.style.width = `${(currentQuestionIndex + 1) / shuffledQuestions.length * 100}%`;
+            currentQuestionIndex++;
+            nextBtn.classList.remove('hidden');
+        }
+        
+        function setStatusClass(element, correct) {
+            if (correct) element.classList.add('correct');
+            else element.classList.add('incorrect');
+        }
+
+        function showResults() {
+            quizScreen.classList.add('fade-out');
+            setTimeout(() => {
+                quizScreen.classList.add('hidden');
+                quizScreen.classList.remove('fade-out');
+                resultsScreen.classList.remove('hidden');
+                resultsScreen.classList.add('fade-in');
+                triggerCelebration(200); // Grand finale celebration
+            }, 600);
+
+            scoreText.innerText = `${userName}, you scored ${score} out of ${shuffledQuestions.length}!`;
+            setRating(score);
+        }
+        
+        function setRating(finalScore) {
+            const total = shuffledQuestions.length;
+            let rating, description;
+            
+            if (finalScore >= total * 0.9) {
+                rating = "Certified Swiftie Genius! 🧣";
+                description = "You're in your Reputation era, and nothing can stop you. You know every lyric, every secret message. It's you, hi, you're the expert, it's you.";
+            } else if (finalScore >= total * 0.6) {
+                rating = "Fearless Fan! ✨";
+                description = "You've been through the eras and have the friendship bracelets to prove it. A true and loyal fan!";
+            } else if (finalScore >= total * 0.3) {
+                rating = "New Romantic! 💖";
+                description = "You're enjoying the music and learning the lore. Welcome to the fandom, it's been waiting for you!";
+            } else {
+                rating = "Just a Debut Listener! 🎸";
+                description = "Looks like you're just starting your journey. Time to put the albums on repeat and dive deeper into the world of Taylor Swift!";
+            }
+            
+            ratingText.innerText = rating;
+            ratingDescription.innerText = description;
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            soundOnIcon.classList.toggle('hidden');
+            soundOffIcon.classList.toggle('hidden');
+            if (isMuted) {
+                Tone.Transport.pause();
+            } else {
+                if (musicInitialized) Tone.Transport.start();
+            }
+        }
+        
+        function triggerCelebration(count) {
+            const colors = ['#fde047', '#f472b6', '#a78bfa', '#60a5fa', '#f5d0e2'];
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confettiContainer.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+
+        // Interactive background logic
+        const canvas = document.getElementById('interactive-bg');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+        const mouse = { x: null, y: null, radius: 100 };
+        window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+        class Particle {
+            constructor(x, y, dX, dY, s, c) { this.x=x; this.y=y; this.directionX=dX; this.directionY=dY; this.size=s; this.color=c; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2, false); ctx.fillStyle=this.color; ctx.fill(); }
+            update() {
+                if(this.x > canvas.width || this.x<0) this.directionX=-this.directionX;
+                if(this.y > canvas.height || this.y<0) this.directionY=-this.directionY;
+                let dx=mouse.x-this.x; let dy=mouse.y-this.y; let dist=Math.sqrt(dx*dx+dy*dy);
+                if(dist < mouse.radius + this.size){
+                    if(mouse.x<this.x && this.x<canvas.width-this.size*10) this.x+=5;
+                    if(mouse.x>this.x && this.x>this.size*10) this.x-=5;
+                    if(mouse.y<this.y && this.y<canvas.height-this.size*10) this.y+=5;
+                    if(mouse.y>this.y && this.y>this.size*10) this.y-=5;
+                }
+                this.x+=this.directionX; this.y+=this.directionY; this.draw();
+            }
+        }
+        function initParticles() {
+            canvas.width=window.innerWidth; canvas.height=window.innerHeight; particlesArray=[];
+            let num=(canvas.height*canvas.width)/9000;
+            const colors=['rgba(245,208,226,0.4)','rgba(216,180,254,0.4)','rgba(167,139,250,0.4)'];
+            for(let i=0;i<num;i++){
+                let s=(Math.random()*5)+1; let x=(Math.random()*((innerWidth-s*2)-(s*2))+s*2); let y=(Math.random()*((innerHeight-s*2)-(s*2))+s*2);
+                let dX=(Math.random()*0.4)-0.2; let dY=(Math.random()*0.4)-0.2; let c=colors[Math.floor(Math.random()*colors.length)];
+                particlesArray.push(new Particle(x,y,dX,dY,s,c));
+            }
+        }
+        function animateParticles() { requestAnimationFrame(animateParticles); ctx.clearRect(0,0,innerWidth,innerHeight); for(let i=0;i<particlesArray.length;i++) particlesArray[i].update(); }
+        window.addEventListener('resize', initParticles);
+        initParticles(); animateParticles();
+    </script>
+</body>
+</html>
