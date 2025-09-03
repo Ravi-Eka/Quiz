@@ -89,7 +89,7 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-6">
 
     <canvas id="interactive-bg"></canvas>
 
@@ -97,21 +97,21 @@
         <div id="confetti-container" class="absolute top-0 left-0 w-full h-full pointer-events-none z-50"></div>
         
         <!-- Start Screen -->
-        <div id="start-screen" class="card rounded-2xl p-8 md:p-12 text-center shadow-2xl fade-in">
-            <h1 class="font-fancy text-4xl md:text-5xl font-bold text-violet-800">The Ultimate Swiftie Quiz</h1>
-            <p class="text-gray-600 mt-4 text-lg">Are you ready for it? Test your Taylor Swift knowledge!</p>
+        <div id="start-screen" class="card rounded-2xl p-6 sm:p-8 md:p-12 text-center shadow-2xl fade-in">
+            <h1 class="font-fancy text-3xl sm:text-4xl md:text-5xl font-bold text-violet-800">The Ultimate Swiftie Quiz</h1>
+            <p class="text-gray-600 mt-4 text-base sm:text-lg">Are you ready for it? Test your Taylor Swift knowledge!</p>
             <div class="mt-6">
                 <input type="text" id="name-input" placeholder="Enter your name" class="w-full max-w-sm mx-auto p-3 rounded-lg border-2 border-violet-300 focus:ring-2 focus:ring-violet-500 focus:outline-none transition">
                 <p id="name-error" class="text-red-500 text-sm mt-2 h-4"></p>
             </div>
-            <button id="start-btn" class="btn btn-primary font-bold py-3 px-8 rounded-full mt-4 text-xl">Start Quiz</button>
+            <button id="start-btn" class="btn btn-primary font-bold py-3 px-6 sm:px-8 rounded-full mt-4 text-lg sm:text-xl">Start Quiz</button>
         </div>
 
         <!-- Quiz Screen -->
-        <div id="quiz-screen" class="card rounded-2xl p-8 md:p-12 shadow-2xl hidden">
+        <div id="quiz-screen" class="card rounded-2xl p-6 sm:p-8 md:p-12 shadow-2xl hidden">
             <div class="relative">
-                <img id="question-image" src="" alt="Quiz Image" class="rounded-lg mb-6 w-full h-48 md:h-64 object-cover shadow-lg transition-opacity duration-300">
-                <div id="timer" class="absolute top-4 right-4 bg-white/70 backdrop-blur-sm text-violet-800 font-bold text-2xl w-16 h-16 rounded-full flex items-center justify-center shadow-md">20</div>
+                <img id="question-image" src="" alt="Quiz Image" class="rounded-lg mb-6 w-full h-40 sm:h-48 md:h-64 object-cover shadow-lg transition-opacity duration-300">
+                <div id="timer" aria-live="polite" class="absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/70 backdrop-blur-sm text-violet-800 font-bold text-xl sm:text-2xl w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-md">20</div>
             </div>
             <div id="progress-container" class="mb-6">
                 <div class="flex justify-between items-center text-sm font-medium text-gray-600 mb-2">
@@ -123,22 +123,24 @@
                 </div>
             </div>
             
-            <h2 id="question-text" class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 min-h-[100px] transition-opacity duration-300">Question goes here...</h2>
-            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 id="question-text" aria-live="polite" class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6 sm:mb-8 min-h-[100px] sm:min-h-[120px] transition-opacity duration-300">Question goes here...</h2>
+            <p id="time-up-message" class="text-center text-red-500 font-bold text-lg my-4 hidden">Time's Up!</p>
+            <div id="answer-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 <!-- Answer buttons will be generated here -->
             </div>
-            <div class="flex justify-end mt-8">
+            <div class="flex justify-end mt-6 sm:mt-8">
                 <button id="next-btn" class="btn btn-primary font-bold py-2 px-6 rounded-full hidden">Next</button>
             </div>
         </div>
 
         <!-- Results Screen -->
-        <div id="results-screen" class="card rounded-2xl p-8 md:p-12 text-center shadow-2xl hidden">
-            <h1 class="font-fancy text-4xl md:text-5xl font-bold text-violet-800">Quiz Complete!</h1>
-            <p id="score-text" class="text-gray-800 mt-4 text-2xl font-semibold"></p>
-            <p id="rating-text" class="text-violet-600 mt-2 text-xl font-medium"></p>
+        <div id="results-screen" class="card rounded-2xl p-6 sm:p-8 md:p-12 text-center shadow-2xl hidden">
+            <h1 class="font-fancy text-3xl sm:text-4xl md:text-5xl font-bold text-violet-800">Quiz Complete!</h1>
+            <p id="score-text" class="text-gray-800 mt-4 text-xl sm:text-2xl font-semibold"></p>
+            <p id="rating-text" class="text-violet-600 mt-2 text-lg sm:text-xl font-medium"></p>
             <p id="rating-description" class="text-gray-600 mt-4 max-w-md mx-auto"></p>
-            <button id="restart-btn" class="btn btn-primary font-bold py-3 px-8 rounded-full mt-8 text-xl">Play Again</button>
+            <p id="motivational-message" class="text-gray-500 italic mt-6 max-w-md mx-auto"></p>
+            <button id="restart-btn" class="btn btn-primary font-bold py-3 px-8 rounded-full mt-8 text-lg sm:text-xl">Play Again</button>
         </div>
     </div>
     
@@ -148,86 +150,44 @@
     </button>
 
     <script>
-        const quizQuestions = [
-            {
-                question: "What is the name of the German Shepherd owned by Andrea Swift, featured in some of Taylor's early home videos?",
-                image: "https://placehold.co/600x400/a78bfa/ffffff?text=Debut+Era",
-                answers: [ { text: "Major", correct: false }, { text: "Kitty", correct: true }, { text: "Bug", correct: false }, { text: "Indy", correct: false }]
-            },
-            {
-                question: "Which of these 'From The Vault' tracks from 'Fearless (TV)' was originally intended for the band Sugarland?",
-                image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era",
-                answers: [ { text: "You All Over Me", correct: false }, { text: "We Were Happy", correct: false }, { text: "Bye Bye Baby", correct: false }, { text: "Babe", correct: true }]
-            },
-            {
-                question: "In the lyric booklet for 'Speak Now', what was the secret message for the song 'Haunted'?",
-                image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era",
-                answers: [ { text: "I'LL ALWAYS REMEMBER US", correct: false }, { text: "I THOUGHT YOU WERE FOREVER", correct: false }, { text: "STILL TO THIS DAY", correct: true }, { text: "I MISS YOU", correct: false }]
-            },
-            {
-                question: "For which song did Taylor use the pseudonym 'Nils Sjöberg' as a songwriter?",
-                image: "https://placehold.co/600x400/60a5fa/ffffff?text=1989+Era",
-                answers: [ { text: "Better Man", correct: false }, { text: "This Is What You Came For", correct: true }, { text: "You'll Always Find Your Way Back Home", correct: false }, { text: "Babe", correct: false }]
-            },
-            {
-                question: "What specific time is mentioned in the lyrics of the song 'Last Kiss'?",
-                image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era",
-                difficulty: 'hard',
-                answers: [ { text: "2:17 AM", correct: false }, { text: "July 9th, 1:58", correct: true }, { text: "Midnight", correct: false }, { text: "4 AM", correct: false }]
-            },
-            {
-                question: "In the 'Anti-Hero' music video, what are the names of her fictional future daughter-in-law and son?",
-                image: "https://placehold.co/600x400/1e293b/ffffff?text=Midnights+Era",
-                answers: [ { text: "Ashley and Chad", correct: false }, { text: "Kimber and Chad", correct: true }, { text: "Crystal and Preston", correct: false }, { text: "Tiffany and Preston", correct: false } ]
-            },
-            {
-                question: "Which of these songs was NOT on the official setlist for the 'reputation Stadium Tour'?",
-                image: "https://placehold.co/600x400/171717/ffffff?text=Reputation+Era",
-                answers: [ { text: "I Did Something Bad", correct: false }, { text: "So It Goes...", correct: true }, { text: "King of My Heart", correct: false }, { text: "Dancing With Our Hands Tied", correct: false }]
-            },
-            {
-                question: "Which music video did Taylor co-direct with Drew Kirsch?",
-                image: "https://placehold.co/600x400/f472b6/ffffff?text=Lover+Era",
-                difficulty: 'hard',
-                answers: [ { text: "The Man", correct: false }, { text: "ME!", correct: false }, { text: "You Need To Calm Down", correct: true }, { text: "cardigan", correct: false } ]
-            },
-            {
-                question: "What is the name of the fictional town that Taylor created for the 'cardigan'/'august'/'betty' love triangle?",
-                image: "https://placehold.co/600x400/6b7280/ffffff?text=Folklore+Era",
-                answers: [ { text: "Gardiner", correct: false }, { text: "Centennial", correct: false }, { text: "No specific town is named", correct: true }, { text: "Cornelia", correct: false }]
-            },
-            {
-                question: "Which track on 'evermore' is a tribute to her grandmother, Marjorie Finlay?",
-                image: "https://placehold.co/600x400/a16207/ffffff?text=Evermore+Era",
-                answers: [ { text: "dorothea", correct: false }, { text: "marjorie", correct: true }, { text: "epiphany", correct: false }, { text: "the best day", correct: false } ]
-            },
-            {
-                question: "What was the name of the cologne Taylor released in 2012?",
-                image: "https://placehold.co/600x400/d8b4fe/333333?text=Red+Era",
-                answers: [ { text: "Incredible Things", correct: false }, { text: "Taylor", correct: false }, { text: "Wonderstruck Enchanted", correct: true }, { text: "Made of Starlight", correct: false }]
-            },
-            {
-                question: "On 'The Tortured Poets Department', what anachronistic device does she say her lover used?",
-                image: "https://placehold.co/600x400/f3f4f6/171717?text=TTPD+Era",
-                answers: [ { text: "A phonograph", correct: false }, { text: "A typewriter", correct: true }, { text: "A quill and ink", correct: false }, { text: "A gramophone", correct: false }]
-            },
-            {
-                question: "What was Taylor's role in the 2014 film 'The Giver'?",
-                image: "https://placehold.co/600x400/c1121f/ffffff?text=Red+Era",
-                difficulty: 'hard',
-                answers: [ { text: "Fiona", correct: false }, { text: "Lily", correct: false }, { text: "Rosemary", correct: true }, { text: "Jonas's Mother", correct: false } ]
-            },
-            {
-                question: "Which song was written about the fallout from the 2009 MTV VMA's incident?",
-                image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era",
-                answers: [ { text: "Mean", correct: false }, { text: "Look What You Made Me Do", correct: false }, { text: "Innocent", correct: true }, { text: "Bad Blood", correct: false }]
-            },
-            {
-                question: "Which of these is a real, unreleased Taylor Swift song title that has been registered on BMI?",
-                image: "https://placehold.co/600x400/d8b4fe/333333?text=Unreleased",
-                answers: [ { text: "My Cure", correct: true }, { text: "Nashville Skyline", correct: false }, { text: "First Glass", correct: false }, { text: "Thirteen Stars", correct: false }]
-            }
+        const allQuizQuestions = [
+            // Original 15
+            { question: "What is the name of the German Shepherd owned by Andrea Swift, featured in some of Taylor's early home videos?", image: "https://placehold.co/600x400/a78bfa/ffffff?text=Debut+Era", answers: [ { text: "Major", correct: false }, { text: "Kitty", correct: true }, { text: "Bug", correct: false }, { text: "Indy", correct: false }] },
+            { question: "Which of these 'From The Vault' tracks from 'Fearless (TV)' was originally intended for the band Sugarland?", image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era", answers: [ { text: "You All Over Me", correct: false }, { text: "We Were Happy", correct: false }, { text: "Bye Bye Baby", correct: false }, { text: "Babe", correct: true }] },
+            { question: "In the lyric booklet for 'Speak Now', what was the secret message for the song 'Haunted'?", image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era", answers: [ { text: "I'LL ALWAYS REMEMBER US", correct: false }, { text: "I THOUGHT YOU WERE FOREVER", correct: false }, { text: "STILL TO THIS DAY", correct: true }, { text: "I MISS YOU", correct: false }] },
+            { question: "For which song did Taylor use the pseudonym 'Nils Sjöberg' as a songwriter?", image: "https://placehold.co/600x400/60a5fa/ffffff?text=1989+Era", answers: [ { text: "Better Man", correct: false }, { text: "This Is What You Came For", correct: true }, { text: "You'll Always Find Your Way Back Home", correct: false }, { text: "Babe", correct: false }] },
+            { question: "What specific time is mentioned in the lyrics of the song 'Last Kiss'?", image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era", difficulty: 'hard', answers: [ { text: "2:17 AM", correct: false }, { text: "July 9th, 1:58 AM", correct: true }, { text: "Midnight", correct: false }, { text: "4 AM", correct: false }] },
+            { question: "In the 'Anti-Hero' music video, what are the names of her fictional future daughter-in-law and son?", image: "https://placehold.co/600x400/1e293b/ffffff?text=Midnights+Era", answers: [ { text: "Ashley and Chad", correct: false }, { text: "Kimber and Chad", correct: true }, { text: "Crystal and Preston", correct: false }, { text: "Tiffany and Preston", correct: false } ] },
+            { question: "Which of these songs was NOT on the official setlist for the 'reputation Stadium Tour'?", image: "https://placehold.co/600x400/171717/ffffff?text=Reputation+Era", answers: [ { text: "I Did Something Bad", correct: false }, { text: "So It Goes...", correct: true }, { text: "King of My Heart", correct: false }, { text: "Dancing With Our Hands Tied", correct: false }] },
+            { question: "Which music video did Taylor co-direct with Drew Kirsch?", image: "https://placehold.co/600x400/f472b6/ffffff?text=Lover+Era", difficulty: 'hard', answers: [ { text: "The Man", correct: false }, { text: "ME!", correct: false }, { text: "You Need To Calm Down", correct: true }, { text: "cardigan", correct: false } ] },
+            { question: "In the 'folklore' love triangle, who is the narrator of the song 'august'?", image: "https://placehold.co/600x400/6b7280/ffffff?text=Folklore+Era", answers: [ { text: "Betty", correct: false }, { text: "James", correct: false }, { text: "An unnamed character", correct: true }, { text: "Inez", correct: false }] },
+            { question: "Which track on 'evermore' is a tribute to her grandmother, Marjorie Finlay?", image: "https://placehold.co/600x400/a16207/ffffff?text=Evermore+Era", answers: [ { text: "dorothea", correct: false }, { text: "marjorie", correct: true }, { text: "epiphany", correct: false }, { text: "the best day", correct: false } ] },
+            { question: "What was the name of the cologne Taylor released in 2012?", image: "https://placehold.co/600x400/d8b4fe/333333?text=Red+Era", answers: [ { text: "Incredible Things", correct: false }, { text: "Taylor", correct: false }, { text: "Wonderstruck Enchanted", correct: true }, { text: "Made of Starlight", correct: false }] },
+            { question: "On 'The Tortured Poets Department', what anachronistic device does she say her lover used?", image: "https://placehold.co/600x400/f3f4f6/171717?text=TTPD+Era", answers: [ { text: "A phonograph", correct: false }, { text: "A typewriter", correct: true }, { text: "A quill and ink", correct: false }, { text: "A gramophone", correct: false }] },
+            { question: "What was Taylor's role in the 2014 film 'The Giver'?", image: "https://placehold.co/600x400/c1121f/ffffff?text=Red+Era", difficulty: 'hard', answers: [ { text: "Fiona", correct: false }, { text: "Lily", correct: false }, { text: "Rosemary", correct: true }, { text: "Jonas's Mother", correct: false } ] },
+            { question: "Which song was written about the fallout from the 2009 MTV VMA's incident?", image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era", answers: [ { text: "Mean", correct: false }, { text: "Look What You Made Me Do", correct: false }, { text: "Innocent", correct: true }, { text: "Bad Blood", correct: false }] },
+            { question: "Which of these is a real, unreleased Taylor Swift song title that has been registered on BMI?", image: "https://placehold.co/600x400/d8b4fe/333333?text=Unreleased", answers: [ { text: "My Cure", correct: true }, { text: "Nashville Skyline", correct: false }, { text: "First Glass", correct: false }, { text: "Thirteen Stars", correct: false }] },
+            
+            // New 15
+            { question: "What item did Taylor say she keeps in her pocket in the song 'I Think He Knows'?", image: "https://placehold.co/600x400/f472b6/ffffff?text=Lover+Era", difficulty: 'hard', answers: [ { text: "A locket", correct: false }, { text: "A lucky penny", correct: false }, { text: "A map of his heart", correct: false }, { text: "His name", correct: true }] },
+            { question: "In her documentary 'Miss Americana', what board game is Taylor shown playing with her family?", image: "https://placehold.co/600x400/60a5fa/ffffff?text=Documentary", answers: [ { text: "Monopoly", correct: false }, { text: "Settlers of Catan", correct: true }, { text: "Scrabble", correct: false }, { text: "Risk", correct: false }] },
+            { question: "Which of these '1989' tracks was co-written and produced with Imogen Heap?", image: "https://placehold.co/600x400/60a5fa/ffffff?text=1989+Era", answers: [ { text: "I Know Places", correct: false }, { text: "All You Had To Do Was Stay", correct: false }, { text: "Clean", correct: true }, { text: "This Love", correct: false }] },
+            { question: "What street does Taylor mention getting a flat tire on in the unreleased song 'I'd Lie'?", image: "https://placehold.co/600x400/a78bfa/ffffff?text=Unreleased", answers: [ { text: "Main Street", correct: false }, { text: "Second Avenue", correct: false }, { text: "Old Mill Road", correct: false }, { text: "Abigail's Street", correct: true }] },
+            { question: "Which 'Red' vault track mentions a 'twin flame bruise'?", image: "https://placehold.co/600x400/c1121f/ffffff?text=Red+Era", answers: [ { text: "All Too Well (10 Minute Version)", correct: true }, { text: "Nothing New", correct: false }, { text: "Message In A Bottle", correct: false }, { text: "Forever Winter", correct: false }] },
+            { question: "In the 'Speak Now' era, what number was famously written on Taylor's hand during her concerts?", image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era", answers: [ { text: "22", correct: false }, { text: "1989", correct: false }, { text: "13", correct: true }, { text: "8", correct: false }] },
+            { question: "What is the name of her character in the 2019 film 'Cats'?", image: "https://placehold.co/600x400/f472b6/ffffff?text=Filmography", answers: [ { text: "Victoria", correct: false }, { text: "Jemima", correct: false }, { text: "Bombalurina", correct: true }, { text: "Grizabella", correct: false }] },
+            { question: "In 'The Last Great American Dynasty', what did Rebekah Harkness dye the neighbor's dog?", image: "https://placehold.co/600x400/6b7280/ffffff?text=Folklore+Era", difficulty: 'hard', answers: [ { text: "Fluorescent orange", correct: false }, { text: "Key lime green", correct: true }, { text: "Hot pink", correct: false }, { text: "Taylor Swift blue", correct: false }] },
+            { question: "Which song on 'Midnights (3am Edition)' contains the lyric 'I'm a crisis of my faith'?", image: "https://placehold.co/600x400/1e293b/ffffff?text=Midnights+Era", answers: [ { text: "Bigger Than The Whole Sky", correct: false }, { text: "The Great War", correct: false }, { text: "Would've, Could've, Should've", correct: true }, { text: "High Infidelity", correct: false }] },
+            { question: "What was the first 'From The Vault' track to be released from 'Fearless (Taylor's Version)'?", image: "https://placehold.co/600x400/facc15/333333?text=Fearless+Era", answers: [ { text: "Mr. Perfectly Fine", correct: false }, { text: "You All Over Me (feat. Maren Morris)", correct: true }, { text: "Don't You", correct: false }, { text: "That's When", correct: false }] },
+            { question: "Which album was the first to win the Grammy for 'Album of the Year' three times for a female artist?", image: "https://placehold.co/600x400/6b7280/ffffff?text=Awards", answers: [ { text: "1989", correct: false }, { text: "Fearless", correct: false }, { text: "folklore", correct: true }, { text: "Midnights", correct: false }] },
+            { question: "What year was Taylor Swift born?", image: "https://placehold.co/600x400/a78bfa/ffffff?text=Debut+Era", answers: [ { text: "1987", correct: false }, { text: "1989", correct: true }, { text: "1990", correct: false }, { text: "1991", correct: false }] },
+            { question: "On 'The Tortured Poets Department', who does Taylor refer to as 'The Chairman'?", image: "https://placehold.co/600x400/f3f4f6/171717?text=TTPD+Era", difficulty: 'hard', answers: [ { text: "Her father", correct: true }, { text: "Jack Antonoff", correct: false }, { text: "A record executive", correct: false }, { text: "Her cat, Benjamin Button", correct: false }] },
+            { question: "Which song's music video features Taylor getting married in a church, but not to the person she loves?", image: "https://placehold.co/600x400/c084fc/ffffff?text=Speak+Now+Era", answers: [ { text: "Love Story", correct: false }, { text: "Mine", correct: false }, { text: "Speak Now", correct: true }, { text: "I Bet You Think About Me", correct: false }] },
+            { question: "What is the name of the first song on Taylor's debut album?", image: "https://placehold.co/600x400/a78bfa/ffffff?text=Debut+Era", answers: [ { text: "Our Song", correct: false }, { text: "Tim McGraw", correct: true }, { text: "Teardrops on My Guitar", correct: false }, { text: "Picture to Burn", correct: false }] },
         ];
+
+        // Constants
+        const QUESTIONS_PER_ROUND = 15;
 
         // Element variables
         const startScreen = document.getElementById('start-screen'), quizScreen = document.getElementById('quiz-screen'), resultsScreen = document.getElementById('results-screen');
@@ -235,12 +195,13 @@
         const nameInput = document.getElementById('name-input'), nameError = document.getElementById('name-error');
         const questionImage = document.getElementById('question-image'), questionText = document.getElementById('question-text'), answerButtons = document.getElementById('answer-buttons');
         const questionCounter = document.getElementById('question-counter'), scoreCounter = document.getElementById('score-counter'), progressBar = document.getElementById('progress-bar'), timerDisplay = document.getElementById('timer');
-        const scoreText = document.getElementById('score-text'), ratingText = document.getElementById('rating-text'), ratingDescription = document.getElementById('rating-description');
+        const scoreText = document.getElementById('score-text'), ratingText = document.getElementById('rating-text'), ratingDescription = document.getElementById('rating-description'), motivationalMessage = document.getElementById('motivational-message');
         const confettiContainer = document.getElementById('confetti-container');
         const soundOnIcon = document.getElementById('sound-on-icon'), soundOffIcon = document.getElementById('sound-off-icon');
+        const timeUpMessage = document.getElementById('time-up-message');
 
         // State variables
-        let currentQuestionIndex, score, shuffledQuestions, isMuted = true, userName, timerInterval;
+        let currentQuestionIndex, score, questionsForThisRound, isMuted = true, userName, timerInterval;
         let musicInitialized = false;
 
         // Music setup
@@ -284,19 +245,16 @@
             }
             nameError.innerText = "";
             
-            if (!musicInitialized) {
-                 initializeMusic();
-            }
-            if (Tone.context.state !== 'running') {
-                Tone.start();
-            }
-            if (!isMuted) {
-                Tone.Transport.start();
-            }
+            if (!musicInitialized) initializeMusic();
+            if (Tone.context.state !== 'running') Tone.start();
+            if (!isMuted) Tone.Transport.start();
 
             currentQuestionIndex = 0;
             score = 0;
-            shuffledQuestions = quizQuestions.sort(() => Math.random() - 0.5);
+            
+            const shuffledPool = allQuizQuestions.sort(() => Math.random() - 0.5);
+            questionsForThisRound = shuffledPool.slice(0, QUESTIONS_PER_ROUND);
+
             scoreCounter.innerText = "Score: 0";
             
             startScreen.classList.add('fade-out');
@@ -323,19 +281,20 @@
         }
         
         function timeUp() {
+            timeUpMessage.classList.remove('hidden');
             Array.from(answerButtons.children).forEach(button => {
                 setStatusClass(button, button.dataset.correct === "true");
                 button.disabled = true;
             });
-            progressBar.style.width = `${(currentQuestionIndex + 1) / shuffledQuestions.length * 100}%`;
+            progressBar.style.width = `${(currentQuestionIndex + 1) / questionsForThisRound.length * 100}%`;
             currentQuestionIndex++;
             nextBtn.classList.remove('hidden');
         }
 
         function showNextQuestion() {
             resetState();
-            if (currentQuestionIndex < shuffledQuestions.length) {
-                showQuestion(shuffledQuestions[currentQuestionIndex]);
+            if (currentQuestionIndex < questionsForThisRound.length) {
+                showQuestion(questionsForThisRound[currentQuestionIndex]);
                 updateProgress();
                 startTimer();
             } else {
@@ -344,8 +303,8 @@
         }
         
         function updateProgress() {
-            questionCounter.innerText = `Question ${currentQuestionIndex + 1} of ${shuffledQuestions.length}`;
-            const progressPercentage = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            questionCounter.innerText = `Question ${currentQuestionIndex + 1} of ${questionsForThisRound.length}`;
+            const progressPercentage = ((currentQuestionIndex) / questionsForThisRound.length) * 100;
             progressBar.style.width = `${progressPercentage}%`;
         }
 
@@ -362,7 +321,7 @@
             question.answers.forEach(answer => {
                 const button = document.createElement('button');
                 button.innerText = answer.text;
-                button.classList.add('answer-btn', 'btn', 'w-full', 'text-left', 'p-4', 'rounded-lg', 'border-2', 'border-violet-300', 'bg-white', 'text-gray-700', 'font-medium');
+                button.classList.add('answer-btn', 'btn', 'w-full', 'text-left', 'p-3', 'sm:p-4', 'rounded-lg', 'border-2', 'border-violet-300', 'bg-white', 'text-gray-700', 'font-medium', 'text-sm', 'sm:text-base');
                 if (answer.correct) button.dataset.correct = answer.correct;
                 button.addEventListener('click', selectAnswer);
                 answerButtons.appendChild(button);
@@ -371,6 +330,7 @@
 
         function resetState() {
             clearInterval(timerInterval);
+            timeUpMessage.classList.add('hidden');
             nextBtn.classList.add('hidden');
             while (answerButtons.firstChild) {
                 answerButtons.removeChild(answerButtons.firstChild);
@@ -381,7 +341,7 @@
             clearInterval(timerInterval);
             const selectedBtn = e.target;
             const correct = selectedBtn.dataset.correct === "true";
-            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const currentQuestion = questionsForThisRound[currentQuestionIndex];
 
             if (correct) {
                 score++;
@@ -396,7 +356,7 @@
                 button.disabled = true;
             });
             
-            progressBar.style.width = `${(currentQuestionIndex + 1) / shuffledQuestions.length * 100}%`;
+            progressBar.style.width = `${(currentQuestionIndex + 1) / questionsForThisRound.length * 100}%`;
             currentQuestionIndex++;
             nextBtn.classList.remove('hidden');
         }
@@ -404,6 +364,23 @@
         function setStatusClass(element, correct) {
             if (correct) element.classList.add('correct');
             else element.classList.add('incorrect');
+        }
+        
+        function animateScore(finalScore) {
+             let currentScore = 0;
+             const total = questionsForThisRound.length;
+             const scoreElement = scoreText;
+
+             const updateScore = () => {
+                 if (currentScore < finalScore) {
+                     currentScore++;
+                     scoreElement.innerText = `${userName}, you scored ${currentScore} out of ${total}!`;
+                     requestAnimationFrame(updateScore);
+                 } else {
+                     scoreElement.innerText = `${userName}, you scored ${finalScore} out of ${total}!`;
+                 }
+             };
+             requestAnimationFrame(updateScore);
         }
 
         function showResults() {
@@ -414,32 +391,39 @@
                 resultsScreen.classList.remove('hidden');
                 resultsScreen.classList.add('fade-in');
                 triggerCelebration(200); // Grand finale celebration
+                animateScore(score); // Animate the score
             }, 600);
 
-            scoreText.innerText = `${userName}, you scored ${score} out of ${shuffledQuestions.length}!`;
+            // Set text immediately for layout, animation will overwrite score part
+            scoreText.innerText = `${userName}, you scored 0 out of ${questionsForThisRound.length}!`;
             setRating(score);
         }
         
         function setRating(finalScore) {
-            const total = shuffledQuestions.length;
-            let rating, description;
+            const total = questionsForThisRound.length;
+            let rating, description, motivation;
             
             if (finalScore >= total * 0.9) {
                 rating = "Certified Swiftie Genius! 🧣";
                 description = "You're in your Reputation era, and nothing can stop you. You know every lyric, every secret message. It's you, hi, you're the expert, it's you.";
+                motivation = "Are you ready to defend your crown? Play again to prove it wasn't a fluke!";
             } else if (finalScore >= total * 0.6) {
                 rating = "Fearless Fan! ✨";
                 description = "You've been through the eras and have the friendship bracelets to prove it. A true and loyal fan!";
+                motivation = "You're so close to genius level! Give it another shot and claim your title.";
             } else if (finalScore >= total * 0.3) {
                 rating = "New Romantic! 💖";
                 description = "You're enjoying the music and learning the lore. Welcome to the fandom, it's been waiting for you!";
+                motivation = "Every legend has a beginning. Play again to continue your journey through the eras!";
             } else {
                 rating = "Just a Debut Listener! 🎸";
                 description = "Looks like you're just starting your journey. Time to put the albums on repeat and dive deeper into the world of Taylor Swift!";
+                motivation = "Don't get discouraged! The best part of being a new fan is all the discovering you get to do. Try again!";
             }
             
             ratingText.innerText = rating;
             ratingDescription.innerText = description;
+            motivationalMessage.innerText = motivation;
         }
 
         function toggleMute() {
@@ -472,7 +456,7 @@
         const canvas = document.getElementById('interactive-bg');
         const ctx = canvas.getContext('2d');
         let particlesArray;
-        const mouse = { x: null, y: null, radius: 100 };
+        const mouse = { x: null, y: null, radius: (window.innerWidth / 20) };
         window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
         class Particle {
             constructor(x, y, dX, dY, s, c) { this.x=x; this.y=y; this.directionX=dX; this.directionY=dY; this.size=s; this.color=c; }
@@ -482,10 +466,10 @@
                 if(this.y > canvas.height || this.y<0) this.directionY=-this.directionY;
                 let dx=mouse.x-this.x; let dy=mouse.y-this.y; let dist=Math.sqrt(dx*dx+dy*dy);
                 if(dist < mouse.radius + this.size){
-                    if(mouse.x<this.x && this.x<canvas.width-this.size*10) this.x+=5;
-                    if(mouse.x>this.x && this.x>this.size*10) this.x-=5;
-                    if(mouse.y<this.y && this.y<canvas.height-this.size*10) this.y+=5;
-                    if(mouse.y>this.y && this.y>this.size*10) this.y-=5;
+                    if(mouse.x<this.x && this.x<canvas.width-this.size*10) this.x+=3;
+                    if(mouse.x>this.x && this.x>this.size*10) this.x-=3;
+                    if(mouse.y<this.y && this.y<canvas.height-this.size*10) this.y+=3;
+                    if(mouse.y>this.y && this.y>this.size*10) this.y-=3;
                 }
                 this.x+=this.directionX; this.y+=this.directionY; this.draw();
             }
@@ -495,14 +479,18 @@
             let num=(canvas.height*canvas.width)/9000;
             const colors=['rgba(245,208,226,0.4)','rgba(216,180,254,0.4)','rgba(167,139,250,0.4)'];
             for(let i=0;i<num;i++){
-                let s=(Math.random()*5)+1; let x=(Math.random()*((innerWidth-s*2)-(s*2))+s*2); let y=(Math.random()*((innerHeight-s*2)-(s*2))+s*2);
+                let s=(Math.random()*4)+1; let x=(Math.random()*((innerWidth-s*2)-(s*2))+s*2); let y=(Math.random()*((innerHeight-s*2)-(s*2))+s*2);
                 let dX=(Math.random()*0.4)-0.2; let dY=(Math.random()*0.4)-0.2; let c=colors[Math.floor(Math.random()*colors.length)];
                 particlesArray.push(new Particle(x,y,dX,dY,s,c));
             }
         }
         function animateParticles() { requestAnimationFrame(animateParticles); ctx.clearRect(0,0,innerWidth,innerHeight); for(let i=0;i<particlesArray.length;i++) particlesArray[i].update(); }
-        window.addEventListener('resize', initParticles);
+        window.addEventListener('resize', ()=> {
+            initParticles();
+            mouse.radius = (window.innerWidth / 20);
+        });
         initParticles(); animateParticles();
     </script>
 </body>
 </html>
+
